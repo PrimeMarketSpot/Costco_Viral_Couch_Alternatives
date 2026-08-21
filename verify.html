@@ -1,0 +1,177 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify a signature</title>
+<meta name="description" content="Independently confirm that a countersigned agreement was not altered after signing. No cooperation from us required.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  label { font-weight: 620; font-size: .95rem; display: block; }
+  input[type=text], textarea {
+    width: 100%; padding: .62rem .75rem; font: inherit; font-size: .95rem;
+    color: var(--ink); background: var(--surface);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  }
+  textarea { font-family: var(--font-mono); font-size: .82rem; resize: vertical; }
+  .checks { display: grid; gap: .55rem; margin: 1.2rem 0 0; padding: 0; list-style: none; }
+  .checks li { display: flex; gap: .6rem; align-items: flex-start; font-size: .94rem; }
+  .checks .mark { flex: none; font-weight: 700; width: 1.1rem; }
+  .receipt { display: grid; grid-template-columns: max-content 1fr; gap: .4rem 1.1rem; margin: 1.2rem 0 0; font-size: .86rem; }
+  .receipt dt { color: var(--ink-muted); }
+  .receipt dd { margin: 0; overflow-wrap: anywhere; }
+</style>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-site-header></div>
+
+<main id="main" class="page section">
+  <div class="prose">
+    <h1>Verify a signature</h1>
+    <p class="lead">
+      Confirm that a countersigned agreement is exactly the document that was signed,
+      and that our countersignature is authentic.
+    </p>
+    <p class="muted">
+      This page is public and requires no account. A confidentiality guarantee that
+      only the guarantor can audit is not a guarantee — so the audit is open to
+      anyone holding a copy: you, your lawyer, a court, or an adversary.
+    </p>
+  </div>
+
+  <form id="lookupForm" class="card stack" style="max-width:var(--measure);margin-top:2rem">
+    <div>
+      <label for="execId">Execution id</label>
+      <p class="faint" style="margin:.2rem 0 .4rem">Printed on the cover sheet of every countersigned PDF.</p>
+      <input id="execId" type="text" required placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off">
+    </div>
+
+    <div>
+      <label for="copyText">Paste your copy of the agreement text <span class="faint" style="font-weight:450">(optional)</span></label>
+      <p class="faint" style="margin:.2rem 0 .4rem">
+        If you paste the text from your PDF, we will hash it and tell you whether it is
+        byte-for-byte what was executed. Leave blank to just look up the record.
+      </p>
+      <textarea id="copyText" rows="6" placeholder="MUTUAL CONFIDENTIALITY AND IDEA PROTECTION AGREEMENT…"></textarea>
+    </div>
+
+    <button class="btn btn--primary" type="submit">Verify</button>
+  </form>
+
+  <div id="result" style="max-width:var(--measure);margin-top:1.5rem"></div>
+
+  <section class="prose" style="margin-top:3.5rem">
+    <h2>Verifying without us</h2>
+    <p>
+      You do not have to trust this page. Everything it does can be reproduced offline:
+    </p>
+    <ol class="stack">
+      <li>Take the agreement text from your countersigned PDF.</li>
+      <li>Compute its SHA-256 digest — <code>shasum -a 256 agreement.txt</code>.</li>
+      <li>Compare it to the document hash printed on the cover sheet.</li>
+      <li>
+        Verify our Ed25519 countersignature against the canonical execution record
+        using our public key, published at
+        <a href="/api/verify-nda?publicKey=1"><code>/api/verify-nda?publicKey=1</code></a>.
+      </li>
+    </ol>
+    <p class="muted">
+      The signing key is asymmetric on purpose. A shared-secret signature would let us
+      prove a countersignature only to ourselves, which is worth nothing to you in a
+      dispute. With a published public key, our signature can be checked by someone
+      who does not trust us and whom we cannot stop.
+    </p>
+
+    <h2>Log integrity</h2>
+    <p>
+      Execution records are append-only and hash-chained: each carries the digest of
+      its predecessor, so a record cannot be removed, reordered, or quietly edited
+      without breaking every link after it. You can check the chain at
+      <a href="/api/verify-nda?audit=1"><code>/api/verify-nda?audit=1</code></a>.
+    </p>
+  </section>
+</main>
+
+<div data-site-footer></div>
+<script type="module" src="/assets/brand.js"></script>
+<script type="module">
+  const el = (id) => document.getElementById(id);
+
+  function mark(ok) {
+    return ok
+      ? '<span class="mark yes">✓</span>'
+      : '<span class="mark no">✗</span>';
+  }
+
+  function render(data) {
+    if (data.found === false) {
+      return `<div class="note note--bad"><p style="margin-bottom:0">
+        <strong>No such execution record.</strong> Check the id on your PDF cover sheet.
+      </p></div>`;
+    }
+
+    const c = data.checks;
+    const allOk = c.agreementTextResolvable && c.agreementHashMatchesStoredText && c.countersignatureValid;
+    const copy = data.submittedCopy;
+
+    const copyBlock = copy ? `
+      <div class="note ${copy.matchesExecutedAgreement ? '' : 'note--bad'}" style="margin-top:1.2rem">
+        <p style="margin-bottom:.4rem"><strong>${copy.matchesExecutedAgreement
+          ? 'Your copy is authentic.' : 'Your copy does not match.'}</strong></p>
+        <p style="margin-bottom:0">${copy.verdict}</p>
+      </div>` : '';
+
+    return `
+      <div class="card" style="border-color:${allOk ? 'var(--good)' : 'var(--bad)'}">
+        <p class="pill ${allOk ? 'pill--good' : ''}">${allOk ? 'Verified' : 'Verification problem'}</p>
+        <h2 style="margin-top:.75rem">Executed ${new Date(data.executedAt).toUTCString()}</h2>
+
+        <ul class="checks">
+          <li>${mark(c.agreementTextResolvable)}<span>The exact text signed is still held and reproducible by the server.</span></li>
+          <li>${mark(c.agreementHashMatchesStoredText)}<span>The stored text hashes to the digest recorded at execution.</span></li>
+          <li>${mark(c.countersignatureValid)}<span>The company countersignature is cryptographically valid.</span></li>
+          <li>${mark(c.isCurrentVersion)}<span>${c.isCurrentVersion
+            ? 'This is the current agreement version.'
+            : 'This is a superseded version — still binding for submissions made under it.'}</span></li>
+        </ul>
+
+        <dl class="receipt">
+          <dt>Signatory</dt><dd>${data.signatory.fullName} &lt;${data.signatory.email}&gt;</dd>
+          <dt>Capacity</dt><dd>${data.signatory.capacity}</dd>
+          <dt>Version</dt><dd class="mono">${data.agreementVersion}</dd>
+          <dt>Document hash</dt><dd class="mono">${data.agreementHash}</dd>
+          <dt>Countersignature</dt><dd class="mono">${data.countersignature}</dd>
+          <dt>Chain hash</dt><dd class="mono">${data.chainHash}</dd>
+        </dl>
+      </div>
+      ${copyBlock}`;
+  }
+
+  el('lookupForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const out = el('result');
+    const id = el('execId').value.trim();
+    const text = el('copyText').value;
+    out.innerHTML = '<p class="faint">Verifying…</p>';
+
+    try {
+      const res = text.trim().length
+        ? await fetch('/api/verify-nda', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ id, text }),
+          })
+        : await fetch(`/api/verify-nda?id=${encodeURIComponent(id)}`);
+
+      const data = await res.json();
+      out.innerHTML = render(data);
+    } catch (err) {
+      out.innerHTML = `<div class="note note--bad"><p style="margin-bottom:0">${err.message}</p></div>`;
+    }
+  });
+
+  // Deep link from the receipt: /verify.html?id=…
+  const preset = new URLSearchParams(location.search).get('id');
+  if (preset) {
+    el('execId').value = preset;
+    el('lookupForm').requestSubmit();
+  }
+</script>

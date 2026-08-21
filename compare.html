@@ -1,0 +1,235 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparison — idea protection, ownership, and revenue</title>
+<meta name="description" content="A sourced comparison of how competing platforms treat submitted ideas, IP ownership, revenue share, and exit.">
+<!-- Held out of the index until every claim is verified against live sources.
+     Remove this tag in the same commit that flips comparisonVerified to true. -->
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  .doc { max-width: 100%; }
+  .cmp td:first-child { font-weight: 620; }
+  .cmp th:nth-child(2), .cmp td:nth-child(2) { background: var(--surface-sunk); }
+  .cmp th:nth-child(3), .cmp td:nth-child(3) {
+    background: color-mix(in srgb, var(--brand-accent) 6%, var(--surface));
+  }
+  .src {
+    display: inline-block; font-size: .72rem; font-family: var(--font-mono);
+    color: var(--ink-faint); border: 1px solid var(--border); border-radius: 4px;
+    padding: .04rem .34rem; margin-left: .3rem; vertical-align: middle;
+    text-decoration: none; white-space: nowrap;
+  }
+  .src:hover { color: var(--ink); border-color: var(--border-strong); }
+  .src[data-verified="pending"] { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-weak); }
+  blockquote.quote {
+    margin: .5rem 0 0; padding: .55rem .8rem; background: var(--surface-sunk);
+    border-left: 2px solid var(--border-strong); border-radius: 0 4px 4px 0;
+    font-family: var(--font-serif); font-size: .87rem; color: var(--ink-muted);
+  }
+  .stakes { font-size: .88rem; color: var(--ink-muted); margin: .4rem 0 0; }
+</style>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-site-header></div>
+
+<main id="main" class="page section">
+  <div id="draftBanner" class="note note--warn" hidden>
+    <p><strong>Unpublished draft — not verified, not indexed.</strong></p>
+    <p style="margin-bottom:0">
+      Every claim below was assembled from search-engine extraction of the source pages and
+      from third-party reviews, because the network used to build this page could not reach
+      the sources directly. <strong>Nothing here may be published until each quote is re-read
+      on the live page, dated, and archived.</strong> See <code>SOURCES.md</code> for the
+      checklist. Claims that fail verification get cut, not softened.
+    </p>
+  </div>
+
+  <div class="doc">
+    <p class="pill">Comparison</p>
+    <h1 style="margin-top:1rem">What happens to your idea, side by side</h1>
+    <p class="lead" style="max-width:56ch">
+      Quoted from the operative documents rather than characterised. Where we could not
+      source a claim, it isn’t here.
+    </p>
+
+    <div class="note">
+      <p style="margin-bottom:0">
+        <strong>Method.</strong> Every row cites the competitor’s own Terms of Service or
+        Privacy Notice, with the retrieval date and an archived snapshot. We quote; we do not
+        paraphrase, characterise, or infer intent. If a document changes, this page changes —
+        and the previous version stays in the page history. If you believe a row is inaccurate,
+        write to us and we will correct it publicly.
+      </p>
+    </div>
+
+    <div class="table-scroll" style="margin-top:2rem">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th scope="col">Question</th>
+            <th scope="col">Polsia</th>
+            <th scope="col">[BRAND]</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Is a confidentiality agreement in place before you disclose?</td>
+            <td>
+              <span class="no">No NDA identified</span>
+              <a class="src" href="https://polsia.com/terms" data-verified="pending">ToS ¶?</a>
+              <p class="stakes">We found no confidentiality obligation running to a user’s submitted idea.</p>
+            </td>
+            <td>
+              <span class="yes">Yes — mutual, countersigned</span>
+              <p class="stakes">Executed before the submission field accepts input; the API refuses content without it.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Can your idea be used to train AI models?</td>
+            <td>
+              <span class="no">Yes</span>
+              <a class="src" href="https://polsia.com/privacy" data-verified="pending">Privacy ¶?</a>
+              <blockquote class="quote">“may use Input and Output to improve their products and technology, including by training or fine-tuning the AI models that power their tools”</blockquote>
+              <p class="stakes">Training is not reversible. Deleting an account does not remove an idea from model weights.</p>
+            </td>
+            <td>
+              <span class="yes">No — barred by the NDA</span>
+              <p class="stakes">A material term, not a policy. Flowed down to model vendors via zero-data-retention endpoints.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td>What happens to your idea if the company is acquired or fails?</td>
+            <td>
+              <span class="no">Transferable</span>
+              <a class="src" href="https://polsia.com/privacy" data-verified="pending">Privacy ¶?</a>
+              <blockquote class="quote">discloses information “in connection with or anticipation of an asset sale, merger, acquisition, or other business transaction, including in the context of a bankruptcy proceeding or other restructuring matter”</blockquote>
+              <p class="stakes">Your idea becomes an asset in the estate, transferable to whoever buys it.</p>
+            </td>
+            <td>
+              <span class="yes">Obligation travels with the data</span>
+              <p class="stakes">Successors are bound. 30 days’ notice, export window, and a right to demand deletion before transfer completes.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Who owns the code that gets built?</td>
+            <td>
+              <span class="no">Not you</span>
+              <a class="src" href="https://polsia.com/terms" data-verified="pending">ToS ¶?</a>
+              <p class="stakes">Reported as exportable but not owned. Verify the precise ownership language before publishing.</p>
+            </td>
+            <td>
+              <span class="yes">You do, on creation</span>
+              <p class="stakes">Work-made-for-hire with present-assignment fallback, plus a perpetual licence to embedded platform components.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td>What share of your revenue does the platform take?</td>
+            <td>
+              <span class="no">20%</span>
+              <a class="src" href="https://polsia.com/terms" data-verified="pending">ToS ¶?</a>
+              <blockquote class="quote">a fee “currently 20%” on all customer payments received through the Services</blockquote>
+              <p class="stakes">Note “currently”. Verify whether the rate is unilaterally variable.</p>
+            </td>
+            <td>
+              <span class="yes">0%</span>
+              <p class="stakes">Subscription only. We take no percentage of anything you earn.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Whose account does your customers’ money land in?</td>
+            <td>
+              <span class="no">The platform’s</span>
+              <a class="src" href="https://polsia.com/terms" data-verified="pending">ToS ¶?</a>
+              <p class="stakes">Reported as routing via the platform’s Stripe Connect, with a 14-day hold, a $50 minimum, and a withdrawal cap around $500 per calendar month. Verify all four figures.</p>
+            </td>
+            <td>
+              <span class="yes">Yours</span>
+              <p class="stakes">We are never in the payment path — no connected account, no hold, no cap, no minimum.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Can you export everything after you stop paying?</td>
+            <td>
+              <span class="muted">Export offered; post-termination terms unverified</span>
+              <a class="src" href="https://polsia.com/terms" data-verified="pending">ToS ¶?</a>
+              <p class="stakes">Verify specifically what survives cancellation and whether export is gated on an active subscription.</p>
+            </td>
+            <td>
+              <span class="yes">Yes — guaranteed 90 days, never paywalled</span>
+              <p class="stakes">Suspension halts our performance, never your access to your own assets.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td>How long is your data retained?</td>
+            <td>
+              <span class="no">Open-ended</span>
+              <a class="src" href="https://polsia.com/privacy" data-verified="pending">Privacy ¶?</a>
+              <blockquote class="quote">retained “for as long as is reasonably necessary for the purposes specified”</blockquote>
+              <p class="stakes">The company determines what is necessary. No fixed deletion window.</p>
+            </td>
+            <td>
+              <span class="yes">Deleted within 30 days on request</span>
+              <p class="stakes">Cryptographic erasure — the per-account key is destroyed — plus a signed deletion certificate.</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Can you verify any of this independently?</td>
+            <td>
+              <span class="muted">Documents only</span>
+              <p class="stakes">You can read the policies. There is no cryptographic artifact to check.</p>
+            </td>
+            <td>
+              <span class="yes">Yes</span>
+              <p class="stakes">Published Ed25519 public key, hashed agreement text, and a hash-chained append-only execution log. <a href="/verify.html">Verify a signature →</a></p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <section class="prose" style="margin-top:3rem">
+      <h2>What we are not saying</h2>
+      <p>
+        We are not saying the competitor has done anything unlawful, or that it has misused
+        anyone’s idea. We have no evidence of either and we make no such claim. Every row above
+        describes what the operative documents <em>permit</em> — which is the only thing a
+        prospective user can actually rely on when deciding whether to disclose.
+      </p>
+      <p>
+        Permissions matter regardless of current conduct, because they are what survives a change
+        of management, a change of strategy, or an acquisition. A company that behaves well today
+        while reserving the right to train on your idea and transfer it in an asset sale has
+        reserved those rights for a reason.
+      </p>
+      <p class="muted">
+        We have also linked their pages directly rather than only quoting them. Read the originals.
+        If we have got something wrong, tell us and we will fix it in public.
+      </p>
+    </section>
+  </div>
+</main>
+
+<div data-site-footer></div>
+<script type="module">
+  import { BRAND } from '/assets/brand.js';
+
+  // The page ships in draft. Flipping BRAND.comparisonVerified to true is a
+  // deliberate act that should happen in the same commit that removes the
+  // noindex tag and replaces every "¶?" citation with a real one.
+  if (!BRAND.comparisonVerified) {
+    document.getElementById('draftBanner').removeAttribute('hidden');
+  } else {
+    for (const el of document.querySelectorAll('.src[data-verified="pending"]')) {
+      el.dataset.verified = 'ok';
+    }
+  }
+</script>

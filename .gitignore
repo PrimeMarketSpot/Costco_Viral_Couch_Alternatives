@@ -1,0 +1,9 @@
+node_modules/
+# Local store: contains execution records, wrapped account keys, and submission
+# ciphertext. Never commit any of it.
+.data/
+.env
+.env.*
+.netlify/
+*.log
+.DS_Store

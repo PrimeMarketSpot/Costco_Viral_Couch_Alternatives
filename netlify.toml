@@ -1,0 +1,31 @@
+[build]
+  publish = "."
+  functions = "api"
+
+[functions]
+  node_bundler = "esbuild"
+  # lib/ is imported by the handlers but lives outside the functions directory.
+  included_files = ["lib/**"]
+
+# Clean URLs for the static pages.
+[[redirects]]
+  from = "/verify/:id"
+  to = "/verify.html?id=:id"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    # Everything is first-party by design: no CDN, no font host, no analytics.
+    # If this policy ever needs widening, that is a signal worth arguing about.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"

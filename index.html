@@ -1,49 +1,250 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The NDA is signed before the idea is typed</title>
+<meta name="description" content="An AI company builder where a mutual NDA is countersigned before you disclose anything. You own the IP, the code, and the payment rail. 0% of your revenue.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  .hero { padding-block: clamp(3.5rem, 10vw, 6.5rem) clamp(2.5rem, 7vw, 4.5rem); }
+  .hero h1 { max-width: 17ch; }
+  .hero .lead { max-width: 56ch; font-size: clamp(1.08rem, 2.2vw, 1.25rem); }
+  .hero-actions { display: flex; gap: .7rem; flex-wrap: wrap; margin-top: 1.8rem; }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Costco Couch Alternatives</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 text-gray-800">
-    <header class="bg-blue-600 text-white py-6">
-        <div class="container mx-auto px-4 text-center">
-            <h1 class="text-3xl font-bold">Missed the Costco Couch? No Problem!</h1>
-            <p class="mt-2">Shop the best alternatives for modular comfort and style!</p>
+  .sequence { display: grid; gap: 0; margin-top: 3.5rem; counter-reset: step; }
+  @media (min-width: 860px) { .sequence { grid-template-columns: repeat(3, 1fr); } }
+  .sequence li {
+    list-style: none; position: relative; padding: 1.5rem;
+    border: 1px solid var(--border); background: var(--surface);
+  }
+  .sequence li:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+  .sequence li:last-child  { border-radius: 0 0 var(--radius) var(--radius); }
+  .sequence li + li { border-top: 0; }
+  @media (min-width: 860px) {
+    .sequence li:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .sequence li:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
+    .sequence li + li { border-top: 1px solid var(--border); border-left: 0; }
+  }
+  .sequence .step {
+    counter-increment: step; font-family: var(--font-mono); font-size: .75rem;
+    color: var(--brand-accent); font-weight: 700; letter-spacing: .06em;
+  }
+  .sequence .step::before { content: "0" counter(step) " — "; }
+  .sequence h3 { margin: .5rem 0 .4rem; font-size: 1.05rem; }
+  .sequence p { margin: 0; font-size: .93rem; color: var(--ink-muted); }
+
+  .promise-grid { margin-top: 2.5rem; }
+  .promise h3 { font-size: 1.02rem; margin-bottom: .35rem; }
+  .promise p { font-size: .93rem; color: var(--ink-muted); margin-bottom: .6rem; }
+  .promise .mech {
+    font-size: .82rem; padding-top: .6rem; border-top: 1px dashed var(--border);
+    color: var(--ink-faint);
+  }
+  .promise .mech strong { color: var(--ink-muted); font-weight: 620; }
+
+  .pull {
+    font-family: var(--font-serif); font-size: clamp(1.3rem, 3.2vw, 1.72rem);
+    line-height: 1.4; max-width: 30ch; margin: 0;
+  }
+</style>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-site-header></div>
+
+<main id="main">
+
+  <!-- Hero -->
+  <section class="page hero">
+    <p class="pill">Confidentiality first, disclosure second</p>
+    <h1 style="margin-top:1rem">The NDA is signed before the idea is typed.</h1>
+    <p class="lead">
+      Every other platform asks you to describe your idea, then tells you afterwards
+      what it may do with it. We invert that. A mutual NDA is countersigned, hashed,
+      and independently verifiable <em>before</em> the submission field will accept a
+      single character.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn--primary" href="/nda.html">Read and execute the NDA</a>
+      <a class="btn btn--ghost" href="/is-your-idea-protected.html">Is your idea protected elsewhere?</a>
+    </div>
+    <p class="faint" style="margin-top:1.2rem">
+      You can read the entire agreement before giving us your email, let alone your idea.
+    </p>
+  </section>
+
+  <!-- The stakes -->
+  <section class="section section--sunk">
+    <div class="page" style="display:grid;gap:2rem;align-items:start">
+      <blockquote class="pull">
+        Disclosing an idea to a platform under no duty of confidence doesn’t just
+        fail to protect it. It can destroy the trade&#8209;secret status you already had.
+      </blockquote>
+      <div class="prose">
+        <p>
+          Copyright protects expression, not ideas. Patents require a filing. For a raw
+          idea, trade secret law is the only doctrine that covers it at all — and it
+          protects you only while you take <em>reasonable measures to keep it secret</em>.
+        </p>
+        <p>
+          Typing that idea into a service that owes you no confidentiality is not a
+          reasonable measure. It is the opposite. The submission itself can be the injury,
+          and no amount of careful drafting afterwards undoes it.
+        </p>
+        <p>
+          <a href="/is-your-idea-protected.html"><strong>Read the full analysis, including what
+          a privacy policy actually does and does not do →</strong></a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sequence -->
+  <section class="section">
+    <div class="page">
+      <div class="prose">
+        <h2>The order of operations is the product</h2>
+        <p class="muted">
+          Nothing here is unusual technology. What is unusual is doing it in this order,
+          and being willing to be held to it.
+        </p>
+      </div>
+
+      <ol class="sequence">
+        <li>
+          <p class="step">You read</p>
+          <h3>The full agreement, before anything</h3>
+          <p>
+            No account, no email, no idea. The agreement is served from a single canonical
+            source, hashed in your browser, and checked against the server’s copy so you can
+            be certain the text you read is the text that binds us.
+          </p>
+        </li>
+        <li>
+          <p class="step">We countersign</p>
+          <h3>Mutual, and cryptographically signed</h3>
+          <p>
+            We sign too, with an Ed25519 key whose public half is published. Your
+            countersigned PDF can be verified by your lawyer, or a court, without our
+            cooperation and without our permission.
+          </p>
+        </li>
+        <li>
+          <p class="step">Then you disclose</p>
+          <h3>Into a field that was inert until now</h3>
+          <p>
+            Not just disabled in the page — the API itself refuses submission content from
+            any account with no execution record. There is no code path that receives your
+            idea outside the agreement.
+          </p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Promises + mechanisms -->
+  <section class="section section--sunk">
+    <div class="page">
+      <div class="prose">
+        <h2>Each promise, and the thing that makes it true</h2>
+        <p class="muted">
+          A guarantee you cannot verify is a slogan. Every commitment below is paired with
+          the mechanism that enforces it, because we expect to be checked.
+        </p>
+      </div>
+
+      <div class="grid grid-2 grid--2 promise-grid">
+        <div class="card promise">
+          <h3>Your idea is never training data</h3>
+          <p>
+            Not for our models, not for anyone’s. Not for fine-tuning, evaluation,
+            benchmarking, or “product improvement”.
+          </p>
+          <p class="mech"><strong>Mechanism:</strong> a material term of the NDA, not a policy
+          we can revise — plus zero-data-retention endpoints required of any model vendor,
+          flowed down contractually.</p>
         </div>
-    </header>
 
-    <main class="container mx-auto px-4 py-8">
-        <!-- Section: Featured Product -->
-        <section class="mb-10">
-            <h2 class="text-2xl font-bold mb-4">Featured Modular Couch Alternative</h2>
-            <div class="bg-white shadow-lg rounded-lg p-6 text-center">
-                <img src="https://m.media-amazon.com/images/I/71s8J8T8NxL._AC_SX679_.jpg" alt="Oversized Modular Sectional Sofa" class="w-full rounded-md mb-4">
-                <h3 class="text-lg font-bold">Oversized Modular Sectional Sofa</h3>
-                <p class="text-gray-600 mt-2">Cloud Couch Sectional, Deep Seat, Removable Cushion Covers, 6-Seater - Cream White Linen.</p>
-                <a href="https://www.amazon.com/dp/B0C5C3Y7P9" target="_blank" class="inline-block bg-blue-500 text-white py-2 px-6 mt-4 rounded-md">Shop Now on Amazon</a>
-            </div>
-        </section>
-
-        <!-- Section: Amazon Storefront -->
-        <section class="mb-10">
-            <h2 class="text-2xl font-bold mb-4">Browse More Options</h2>
-            <div class="bg-white shadow-lg rounded-lg p-6 text-center">
-                <img src="https://m.media-amazon.com/images/I/71s8J8T8NxL._AC_SX679_.jpg" alt="Amazon Storefront" class="w-full rounded-md mb-4">
-                <h3 class="text-lg font-bold">Find More Modular Couches on My Amazon Storefront</h3>
-                <p class="text-gray-600 mt-2">Discover a curated selection of stylish modular furniture and other home essentials.</p>
-                <a href="https://www.amazon.com/shop/lilthelast?ref_=cm_sw_r_cp_ud_aipsfshop_3N8C1WM21PBCMNGF6S7V" target="_blank" class="inline-block bg-blue-500 text-white py-2 px-6 mt-4 rounded-md">Shop My Storefront</a>
-            </div>
-        </section>
-    </main>
-
-    <footer class="bg-gray-800 text-white py-6">
-        <div class="container mx-auto px-4 text-center">
-            <p>&copy; 2025 Your Brand. All rights reserved.</p>
-            <p class="mt-2">Disclosure: As an Amazon Associate, I earn from qualifying purchases. Thank you for your support!</p>
+        <div class="card promise">
+          <h3>You own everything</h3>
+          <p>
+            The idea, the code, the copy, the designs, the brand, the data. Assignment runs
+            <em>to you</em>, at the moment of creation.
+          </p>
+          <p class="mech"><strong>Mechanism:</strong> work-made-for-hire with a present-assignment
+          fallback, plus a perpetual licence to any platform component embedded in your work so
+          you can leave with it intact.</p>
         </div>
-    </footer>
-</body>
-</html>
+
+        <div class="card promise">
+          <h3>0% of your revenue</h3>
+          <p>
+            We are never in your payment path. Your Stripe account, your money, your
+            withdrawal schedule. No holds, no caps, no minimums.
+          </p>
+          <p class="mech"><strong>Mechanism:</strong> we hold no connected account on your behalf
+          and take no security interest. There is no plumbing through which a cut could be taken.</p>
+        </div>
+
+        <div class="card promise">
+          <h3>An acquisition can’t launder the duty</h3>
+          <p>
+            If we are bought, or fail, the obligation travels with the data. Your idea is not
+            an asset in our estate.
+          </p>
+          <p class="mech"><strong>Mechanism:</strong> the NDA binds successors and assigns, with
+          30 days’ notice, an export window, and a right to demand deletion <em>before</em> any
+          transfer completes.</p>
+        </div>
+
+        <div class="card promise">
+          <h3>Non-payment never holds your work hostage</h3>
+          <p>
+            Cancel, lapse, or walk away: export stays open and stays free. Suspension stops our
+            performance, never your access.
+          </p>
+          <p class="mech"><strong>Mechanism:</strong> a contractual 90-day post-termination export
+          guarantee, and an express bar on putting export behind a payment.</p>
+        </div>
+
+        <div class="card promise">
+          <h3>Deletion that actually deletes</h3>
+          <p>
+            Ask, and it is gone in 30 days, with a signed certificate confirming it.
+          </p>
+          <p class="mech"><strong>Mechanism:</strong> your content is encrypted under a key unique
+          to your account. Deletion destroys the key, which renders any residual ciphertext
+          cryptographically unrecoverable.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Honesty -->
+  <section class="section">
+    <div class="page prose">
+      <h2>What we will not claim</h2>
+      <p>
+        The industry we are competing with over-promises about idea protection, so it would be
+        a poor start to do the same.
+      </p>
+      <ul class="stack">
+        <li>An NDA <strong>does not create IP rights</strong> that don’t otherwise exist.</li>
+        <li>An NDA <strong>cannot stop independent invention</strong> by someone who never saw your idea. Nothing can.</li>
+        <li>An NDA is <strong>not a patent</strong>. If your idea is patentable, speak to an attorney about a provisional filing — do that as well as this, not instead of it.</li>
+        <li>We are <strong>not your lawyer</strong>, and nothing on this site is legal advice.</li>
+      </ul>
+      <p>
+        What an NDA does is place us under an enforceable duty before you speak, and give you a
+        cause of action if we break it. That duty is precisely what is missing today — and it is
+        enough to keep your disclosure consistent with trade secret protection rather than
+        destructive of it.
+      </p>
+      <p style="margin-top:2rem">
+        <a class="btn btn--primary" href="/nda.html">Read the agreement in full</a>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<div data-site-footer></div>
+<script type="module" src="/assets/brand.js"></script>

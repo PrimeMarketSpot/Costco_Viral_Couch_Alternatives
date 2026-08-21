@@ -1,0 +1,15 @@
+{
+  "name": "nda-first-company-builder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "An AI company builder where a mutual NDA is countersigned before the idea is disclosed.",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "keygen": "node scripts/keygen.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

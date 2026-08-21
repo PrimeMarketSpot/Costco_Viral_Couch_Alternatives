@@ -1,0 +1,173 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Execute the mutual NDA</title>
+<meta name="description" content="Read and execute the mutual confidentiality agreement. It is countersigned before you disclose anything.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  .agreement-pane {
+    height: min(60vh, 560px);
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    line-height: 1.62;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    tab-size: 2;
+  }
+  .agreement-pane:focus-visible { outline: 2px solid var(--brand-accent); outline-offset: 2px; }
+
+  .scroll-track {
+    height: 5px; background: var(--surface-sunk); border-radius: 999px;
+    overflow: hidden; margin-top: .75rem;
+  }
+  .scroll-track > span { display: block; height: 100%; width: 0; background: var(--brand-accent); transition: width .1s linear; }
+
+  .scroll-gate { margin-top: .6rem; font-size: .9rem; color: var(--ink-muted); display: flex; gap: .5rem; align-items: center; }
+  .scroll-gate.is-complete { color: var(--good); font-weight: 600; }
+  .scroll-gate.is-complete::before { content: "✓"; }
+
+  label { font-weight: 620; font-size: .95rem; display: block; }
+  input[type=text], input[type=email], select, textarea {
+    width: 100%; padding: .62rem .75rem; font: inherit; font-size: .97rem;
+    color: var(--ink); background: var(--surface);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  }
+  textarea { font-family: var(--font-mono); font-size: .88rem; resize: vertical; }
+  .check { display: flex; gap: .65rem; align-items: flex-start; font-size: .93rem; line-height: 1.5; }
+  .check input { margin-top: .28rem; flex: none; width: 1rem; height: 1rem; accent-color: var(--brand-accent); }
+  .check label { font-weight: 450; }
+
+  .receipt { display: grid; grid-template-columns: max-content 1fr; gap: .4rem 1.1rem; margin: 1.2rem 0 0; font-size: .86rem; }
+  .receipt dt { color: var(--ink-muted); }
+  .receipt dd { margin: 0; }
+  .wrap { overflow-wrap: anywhere; }
+
+  .fingerprint {
+    display: flex; flex-wrap: wrap; gap: .35rem 1.2rem; align-items: baseline;
+    font-size: .8rem; color: var(--ink-muted); margin-top: .85rem;
+  }
+  .fingerprint .mono { overflow-wrap: anywhere; color: var(--ink); }
+</style>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-site-header></div>
+
+<main id="main" class="page section">
+  <div class="prose">
+    <p class="pill">Step one, before anything else</p>
+    <h1>Execute the mutual NDA</h1>
+    <p class="lead">
+      You have not disclosed anything yet, and you will not be asked to until this
+      agreement is countersigned. That ordering is the entire product.
+    </p>
+  </div>
+
+  <div class="note" style="max-width:var(--measure)">
+    <p style="margin-bottom:0">
+      This agreement is <strong>mutual</strong> and binds [BRAND] from the moment you
+      execute it. It is not a checkbox on a signup form — it is countersigned,
+      hashed, and independently verifiable by anyone you show it to.
+    </p>
+  </div>
+
+  <section style="margin-top:2rem">
+    <h2 class="visually-hidden">The agreement</h2>
+    <p id="agreementMeta" class="faint">Loading the agreement from the server…</p>
+
+    <div
+      id="agreementText"
+      class="agreement-pane"
+      tabindex="0"
+      role="document"
+      aria-label="Mutual Confidentiality and Idea Protection Agreement. Scrollable."
+    ></div>
+
+    <div class="scroll-track" role="progressbar" aria-label="Reading progress"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="scrollProgress"></span></div>
+
+    <p id="scrollGate" class="scroll-gate">
+      <span id="scrollGateLabel">Scroll to the end of the agreement to enable signing.</span>
+    </p>
+
+    <div class="fingerprint">
+      <span>Version <strong id="versionDisplay" class="mono">—</strong></span>
+      <span>SHA-256 <span id="hashDisplay" class="mono">—</span></span>
+    </div>
+  </section>
+
+  <form id="signForm" class="card stack" style="max-width:var(--measure);margin-top:2rem">
+    <h2 style="margin:0">Signature</h2>
+
+    <div>
+      <label for="fullName">Full legal name</label>
+      <p class="faint" style="margin:.2rem 0 .4rem">Your typed name is your signature.</p>
+      <input id="fullName" type="text" required maxlength="200" autocomplete="name">
+    </div>
+
+    <div>
+      <label for="email">Email</label>
+      <p class="faint" style="margin:.2rem 0 .4rem">Where your countersigned copy is delivered.</p>
+      <input id="email" type="email" required maxlength="320" autocomplete="email">
+    </div>
+
+    <div>
+      <label for="capacity">Signing as</label>
+      <select id="capacity">
+        <option value="individual">An individual</option>
+        <option value="entity">An entity I am authorized to bind</option>
+      </select>
+    </div>
+
+    <div class="check">
+      <input id="esign" type="checkbox">
+      <label for="esign">
+        I consent to executing this agreement electronically under the ESIGN Act and
+        applicable state UETA. I understand I may request a paper copy, may withdraw
+        this consent, and will be able to download and retain a countersigned copy.
+      </label>
+    </div>
+
+    <div class="check">
+      <input id="assent" type="checkbox">
+      <label for="assent">
+        I have read this agreement in full and I intend my typed name above as my
+        signature.
+      </label>
+    </div>
+
+    <div>
+      <button id="executeBtn" class="btn btn--primary" type="submit" disabled>
+        Execute the agreement
+      </button>
+      <p class="faint" style="margin:.6rem 0 0">
+        Nothing is sent to [BRAND] about your idea at this step. Only your name, email,
+        and assent are recorded.
+      </p>
+    </div>
+  </form>
+
+  <div id="executeResult" style="max-width:var(--measure);margin-top:1.5rem"></div>
+
+  <div class="prose" style="margin-top:3rem">
+    <h2>What we are not claiming</h2>
+    <p class="muted">
+      An NDA does not create intellectual property rights that do not otherwise exist,
+      and it cannot stop someone who never saw your idea from independently inventing
+      the same thing. No agreement can do either. What this one does is put us under an
+      enforceable duty of confidence <em>before</em> you disclose — which is what makes
+      your disclosure to us a disclosure under confidentiality, capable of supporting
+      rather than defeating the reasonable-measures element of trade secret protection.
+      If your idea is patentable, talk to a qualified attorney about a provisional
+      filing as well. We are not a substitute for counsel, and we will not pretend to be.
+    </p>
+  </div>
+</main>
+
+<div data-site-footer></div>
+<script type="module" src="/assets/brand.js"></script>
+<script type="module" src="/assets/nda-gate.js"></script>

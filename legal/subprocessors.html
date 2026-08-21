@@ -1,0 +1,113 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subprocessors</title>
+<meta name="description" content="Every third party that can touch your data, what it does, and the terms it is bound by.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  .doc { max-width: 100%; }
+  .doc h2 { margin-top: 2.4rem; }
+</style>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-site-header></div>
+
+<main id="main" class="page section">
+  <div class="doc">
+    <p class="pill">Legal</p>
+    <h1 style="margin-top:1rem">Subprocessors</h1>
+    <p class="lead" style="max-width:56ch">
+      Every third party that can touch your data, what it does, and where. We give 30 days'
+      notice before adding to this list, and we remain liable for all of them.
+    </p>
+
+    <div class="note note--warn">
+      <p><strong>Pre-launch. This list is not yet final.</strong></p>
+      <p style="margin-bottom:0">
+        Infrastructure decisions are still open. This page ships now, empty and honest, rather
+        than later and reassuring, because a subprocessor list published only once it is
+        flattering is not a disclosure — it is marketing. Every row will be filled in before the
+        first real submission is accepted.
+      </p>
+    </div>
+
+    <div class="table-scroll" style="margin-top:2rem">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Subprocessor</th>
+            <th scope="col">Purpose</th>
+            <th scope="col">Data it can reach</th>
+            <th scope="col">Region</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Hosting / edge <span class="faint">(TBD)</span></td>
+            <td>Serving the site and running the API</td>
+            <td>Request metadata; submission <em>ciphertext</em> in transit</td>
+            <td>TBD</td>
+          </tr>
+          <tr>
+            <td>Key management <span class="faint">(TBD)</span></td>
+            <td>Holding the root key that wraps per-account content keys</td>
+            <td>Wrapped keys only — never plaintext content</td>
+            <td>TBD</td>
+          </tr>
+          <tr>
+            <td>Model provider <span class="faint">(TBD)</span></td>
+            <td>Generating code and content when building your venture</td>
+            <td>
+              Submission content, at inference time only
+              <br><span class="pill pill--warn" style="margin-top:.35rem">Zero data retention required</span>
+            </td>
+            <td>TBD</td>
+          </tr>
+          <tr>
+            <td>Payments <span class="faint">(TBD)</span></td>
+            <td>Billing your subscription</td>
+            <td>Name, email, billing details. No submission content.</td>
+            <td>TBD</td>
+          </tr>
+          <tr>
+            <td>Transactional email <span class="faint">(TBD)</span></td>
+            <td>Account and security notices; delivering countersigned copies</td>
+            <td>Name, email. No submission content.</td>
+            <td>TBD</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>The model provider is the hard one</h2>
+    <p style="max-width:var(--measure)">
+      Everything else on this list handles ciphertext or ordinary account data. The model provider
+      is different: to build your venture, it has to see your idea in the clear at inference time.
+      That makes it the single point where our confidentiality promise could quietly fail.
+    </p>
+    <p style="max-width:var(--measure)">
+      So it is subject to a hard requirement, not a preference: a contractual
+      <strong>zero-data-retention</strong> arrangement, under which the provider does not retain,
+      log, or train on what we send. NDA §6.2.
+    </p>
+    <p style="max-width:var(--measure)">
+      <strong>We will not publish a "never trained on" claim before that arrangement is signed.</strong>
+      A promise that depends on a vendor term we have not secured is not a promise, and the whole
+      premise of this company is that the difference matters.
+    </p>
+
+    <h2>Notice</h2>
+    <p style="max-width:var(--measure)">
+      We give at least 30 days' written notice before adding a subprocessor. If you object, you may
+      export everything and terminate before the change takes effect. NDA §6.3.
+    </p>
+
+    <p class="faint" style="margin-top:3rem;font-size:.87rem">
+      Last updated: pre-launch. This page must be accurate before the service accepts its first
+      real submission.
+    </p>
+  </div>
+</main>
+
+<div data-site-footer></div>
+<script type="module" src="/assets/brand.js"></script>

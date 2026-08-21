@@ -1,0 +1,221 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Notice</title>
+<meta name="description" content="What we collect, what we do with it, and — specifically — what we have contractually barred ourselves from doing.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  .doc { max-width: var(--measure); }
+  .doc h2 { margin-top: 2.4rem; }
+  .doc h3 { margin-top: 1.6rem; font-size: 1.02rem; }
+</style>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-site-header></div>
+
+<main id="main" class="page section">
+  <div class="doc">
+    <p class="pill">Legal</p>
+    <h1 style="margin-top:1rem">Privacy Notice</h1>
+    <p class="faint">Version 1.0.0 — draft pending legal review. Not yet in force.</p>
+
+    <div class="note">
+      <p><strong>Read this first.</strong> This notice covers personal information — your name,
+      email, billing details, and how you use the site.</p>
+      <p style="margin-bottom:0">
+        It is <em>not</em> what protects your idea. Your idea is protected by the
+        <a href="/nda.html">mutual NDA</a>, which is a contract you and we both sign, which we
+        cannot revise unilaterally, and which gives you a cause of action if we break it. We say
+        this here because conflating the two documents is the exact mistake this company exists
+        to correct, and it would be absurd to reproduce it in our own policy.
+      </p>
+    </div>
+
+    <h2>1. What we collect</h2>
+
+    <h3>1.1 Account and execution data</h3>
+    <p>
+      Your name, email address, and signing capacity; and for each NDA you execute, the agreement
+      version, its hash, the UTC timestamp, your IP address, your user agent, and your recorded
+      assent. This is the evidentiary record of the agreement. It is append-only.
+    </p>
+
+    <h3>1.2 Submission content</h3>
+    <p>
+      Your ideas and everything you submit under the NDA. This is
+      <strong>encrypted under a key unique to your account</strong> before it is written to disk.
+      It is governed by the NDA, not by this notice, and the restrictions in NDA §3.2 apply to it
+      in full.
+    </p>
+    <p>
+      Submission <em>titles</em> are stored unencrypted so your submissions can be listed without
+      decryption. We tell you this at the point of entry and advise putting nothing confidential
+      in a title.
+    </p>
+
+    <h3>1.3 Billing</h3>
+    <p>
+      Handled by our payment processor. We store a customer reference and subscription state. We
+      never see or store your card details.
+    </p>
+
+    <h3>1.4 Operational logs</h3>
+    <p>
+      Request metadata — timestamps, endpoints, status codes, IP addresses — retained for 30 days
+      for security and debugging. Log lines never contain submission content.
+    </p>
+
+    <h3>1.5 What we do not collect</h3>
+    <ul class="stack">
+      <li>No third-party analytics. No Google Analytics, no product analytics SDK.</li>
+      <li>No advertising or tracking pixels, and no cross-site tracking of any kind.</li>
+      <li>No cookies except a strictly necessary session cookie once accounts exist.</li>
+      <li>No data brokers. We buy no information about you from anyone.</li>
+      <li>
+        No third-party fonts, scripts, or stylesheets. Every asset on this site is served by us,
+        so loading a page does not disclose your visit to anyone else.
+      </li>
+    </ul>
+
+    <h2>2. What we do with it</h2>
+    <p>We use personal information only to:</p>
+    <ul class="stack">
+      <li>provide the services you have asked for;</li>
+      <li>maintain the NDA execution record and make it verifiable;</li>
+      <li>bill you;</li>
+      <li>contact you about your account, security, or changes to these documents;</li>
+      <li>keep the service secure and investigate abuse.</li>
+    </ul>
+
+    <h2>3. What we have barred ourselves from doing</h2>
+    <p>
+      Most privacy policies are lists of permissions. This section is the opposite. We will not,
+      and under the NDA cannot:
+    </p>
+    <ul class="stack">
+      <li>
+        <strong>Train on your submissions.</strong> Not our models, not anyone else's; not
+        fine-tuning, distillation, alignment, evaluation, or benchmarking. NDA §3.2(a).
+      </li>
+      <li>
+        <strong>Mine your submissions for our own product development</strong>, market research,
+        trend reports, or datasets — identified or aggregated. NDA §3.2(b)–(c).
+      </li>
+      <li><strong>Sell, rent, license, or publish your data.</strong> To anyone, for any price. NDA §3.2(d).</li>
+      <li>
+        <strong>Compete with you using what you told us.</strong> We will not build, fund, staff,
+        or advise a venture that competes with one described in your submission. NDA §3.2(e).
+      </li>
+      <li>
+        <strong>Read your submissions.</strong> Human review is barred except to investigate a
+        specific documented security incident or violation of law, at minimum scope, with notice
+        to you within 72 hours unless a court order prohibits it. NDA §3.2(f).
+      </li>
+    </ul>
+
+    <h2>4. Sharing</h2>
+    <p>We disclose personal information only to:</p>
+    <ul class="stack">
+      <li>
+        <strong>Subprocessors</strong> strictly necessary to run the service, each bound by terms
+        at least as protective as the NDA, each listed publicly at
+        <a href="/legal/subprocessors.html">/legal/subprocessors.html</a>, with 30 days' notice
+        before any addition. We remain liable for what they do.
+      </li>
+      <li>
+        <strong>Legal process</strong>, where compelled — and then only the minimum required,
+        with advance notice to you unless we are legally prohibited from giving it, so that you
+        have the opportunity to seek a protective order.
+      </li>
+    </ul>
+
+    <h3>4.1 Acquisition, insolvency, and the clause we did not write</h3>
+    <p>
+      Nearly every privacy policy contains a clause permitting the transfer of your data in a
+      merger, acquisition, asset sale, or bankruptcy. It is so standard that it is rarely read.
+      It is also the clause that decides what happens to your idea on the worst day in the
+      company's life.
+    </p>
+    <p>Ours is narrower, deliberately:</p>
+    <ul class="stack">
+      <li>Any successor takes your data <strong>subject to the NDA in full</strong>, and we must make that an express condition of the transfer. NDA §8.1.</li>
+      <li>You get <strong>at least 30 days' notice</strong> before any such transfer. NDA §8.2.</li>
+      <li>During that window you may <strong>export everything and demand deletion</strong>, and we must comply <em>before</em> the transfer completes. NDA §8.2.</li>
+      <li>Your submissions are <strong>not a saleable asset</strong> of our estate in any insolvency. NDA §8.3.</li>
+    </ul>
+
+    <h2>5. Retention</h2>
+    <p>
+      "As long as reasonably necessary" is the industry's phrase for indefinitely, at our
+      discretion. We have committed to specifics instead:
+    </p>
+    <div class="table-scroll" style="margin:1rem 0">
+      <table>
+        <thead><tr><th>Data</th><th>Retained</th></tr></thead>
+        <tbody>
+          <tr><td>Submissions and work product</td><td>Until you delete them, or 90 days after termination</td></tr>
+          <tr><td>NDA execution records</td><td>Permanently — append-only. Contains no submission content, and is evidence you may need.</td></tr>
+          <tr><td>Operational logs</td><td>30 days</td></tr>
+          <tr><td>Billing records</td><td>7 years, as tax law requires</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>6. Deletion</h2>
+    <p>
+      On request we delete your submissions and work product within 30 days and issue a signed
+      deletion certificate.
+    </p>
+    <p>
+      Deletion here is cryptographic, not a flag. Your content is encrypted under a key unique to
+      your account; we destroy that key, which renders any residual ciphertext — in a backup, on a
+      replica, anywhere — permanently unrecoverable. This is the difference between data being
+      marked deleted and data being gone.
+    </p>
+    <p>
+      The execution record survives, because it proves an agreement existed and both parties may
+      one day need it. It contains no submission content.
+    </p>
+
+    <h2>7. Your rights</h2>
+    <p>
+      Regardless of where you live, you may access, correct, export, or delete your personal
+      information, and object to or restrict processing. Write to us and we will respond within
+      30 days. We do not charge for these requests and we do not require a reason.
+    </p>
+    <p>
+      Export is available at any time in a non-proprietary machine-readable format, at no charge,
+      including after cancellation. It is never placed behind a payment. NDA §10.
+    </p>
+
+    <h2>8. Security</h2>
+    <p>
+      Encryption in transit and at rest; per-account content keys; an append-only, hash-chained
+      execution log; least-privilege access. We will notify you of any unauthorised access to your
+      confidential information without undue delay and in any event within 72 hours. NDA §11.
+    </p>
+
+    <h2>9. Changes to this notice</h2>
+    <p>
+      We may update this notice, and will give 30 days' notice of material changes.
+    </p>
+    <p>
+      <strong>But note the limit of that.</strong> This notice cannot expand what we may do with
+      your submissions, because those are governed by an executed contract that we cannot amend
+      unilaterally. A new NDA version applies only prospectively and only if you sign it.
+      Submissions you have already made stay governed by the terms in force when you made them,
+      permanently. NDA §15.2.
+    </p>
+
+    <h2>10. Contact</h2>
+    <p>Write to us about anything in this notice, including to tell us we have got something wrong.</p>
+
+    <p class="faint" style="margin-top:3rem;font-size:.87rem">
+      Draft pending legal review. Do not rely on this document until that review is complete and
+      this line is removed.
+    </p>
+  </div>
+</main>
+
+<div data-site-footer></div>
+<script type="module" src="/assets/brand.js"></script>
