@@ -1,58 +1,57 @@
 /* ---------------------------------------------------------------------------
-   POST /api/submit-idea
+   POST /api/submit-idea   { title, content }
 
    This is where the product's central claim is either true or it isn't.
 
    The claim: "the NDA is executed before your idea is received." A disabled
    textarea does not make that true — anyone can re-enable a DOM node or curl the
    endpoint directly. The claim is true only if the SERVER refuses to accept
-   submission content from a tenant with no execution record, which is what the
-   gate below does, before it reads the content field at all.
+   submission content from a caller with no execution record, which is what
+   requireSignedNda() does, before this handler reads the content field at all.
+
+   Identity comes from the session cookie, never from the request body. An
+   earlier version took an `email` field, which meant anyone could file a
+   submission under someone else's account — attributing an idea to a person who
+   never sent it, inside a system whose entire purpose is establishing who
+   disclosed what and when.
 
    Two further properties follow from the design rather than from a policy page:
 
-     - The content is encrypted under a key unique to this tenant before it
-       touches disk, so "we do not train on your idea" is backed by our not
-       holding it in readable form.
+     - Content is encrypted under a key unique to this account before it touches
+       disk, so "we do not train on your idea" is backed by our not holding it in
+       readable form.
      - Nothing is echoed back. The response confirms receipt with a size and a
-       digest; it never returns the content, so a leaked response is not a leaked
-       idea.
+       digest; a leaked response is not a leaked idea.
    --------------------------------------------------------------------------- */
 
-import { latestExecutionForTenant, getTenantKeyRecord, putTenantKeyRecord, putSubmission }
-  from '../lib/store.js';
+import { getTenantKeyRecord, putTenantKeyRecord, putSubmission } from '../lib/store.js';
 import { createTenantKey, unwrapTenantKey, encryptForTenant, hashText, newId }
   from '../lib/crypto.js';
-import { json, fail, methodNotAllowed, readJson, isEmail, isNonEmptyString } from '../lib/http.js';
+import { requireSignedNda } from '../lib/auth.js';
+import { json, fail, methodNotAllowed, readJson, isNonEmptyString } from '../lib/http.js';
 
 const MAX_CONTENT_CHARS = 100_000;
 
 export default async function handler(req) {
   if (req.method !== 'POST') return methodNotAllowed(['POST']);
 
+  /* ======================================================================= */
+  /*  THE GATE. Nothing below this runs without a countersigned NDA.         */
+  /* ======================================================================= */
+
+  const auth = await requireSignedNda(req);
+  if (!auth.ok) {
+    return fail(auth.status, auth.code, auth.message,
+      auth.code === 'nda_not_executed' ? { executeAt: '/nda.html' } : {});
+  }
+  const { tenantId, execution } = auth;
+
+  /* ======================================================================= */
+
   const [body, bodyError] = await readJson(req);
   if (bodyError) return bodyError;
 
-  const { email, title, content } = body;
-
-  if (!isEmail(email)) {
-    return fail(422, 'email_required', 'A valid email address is required to identify your account.');
-  }
-  const tenantId = email.trim().toLowerCase();
-
-  /* ======================================================================= */
-  /*  THE GATE. Nothing below this block runs without a countersigned NDA.    */
-  /* ======================================================================= */
-
-  const execution = await latestExecutionForTenant(tenantId);
-  if (!execution) {
-    return fail(403, 'nda_not_executed',
-      'No countersigned confidentiality agreement exists for this account. ' +
-      'Nothing was received, read, logged, or stored. Execute the mutual NDA first.',
-      { executeAt: '/nda.html' });
-  }
-
-  /* ======================================================================= */
+  const { title, content } = body;
 
   if (!isNonEmptyString(title, 300)) {
     return fail(422, 'title_required', 'A short title is required.');
@@ -77,6 +76,7 @@ export default async function handler(req) {
     dek = minted.dek;
   }
 
+  const now = new Date().toISOString();
   const ciphertext = encryptForTenant(dek, tenantId, content);
 
   // Integrity digest of the plaintext, so the user can later prove what they
@@ -86,26 +86,33 @@ export default async function handler(req) {
   const submission = await putSubmission({
     id: newId(),
     tenantId,
-    // The title is stored in the clear so submissions are listable in the
-    // dashboard without decryption. Flagged to the user in the UI: put nothing
-    // confidential in the title.
+    // The title is stored in the clear so the vault is listable without
+    // decryption. Flagged to the user at the point of entry: nothing
+    // confidential belongs in a title.
     title: title.trim(),
-    ciphertext,
-    contentDigest,
-    contentChars: content.length,
-    createdAt: new Date().toISOString(),
-    // Binds the submission to the agreement in force when it was made, so there
-    // is never ambiguity about which terms govern it.
-    ndaExecutionId: execution.id,
-    ndaAgreementVersion: execution.agreementVersion,
-    ndaAgreementHash: execution.agreementHash,
+    createdAt: now,
+    updatedAt: now,
+    // Revisions accumulate; the first submission is revision 1.
+    revisions: [{
+      revision: 1,
+      ciphertext,
+      contentDigest,
+      contentChars: content.length,
+      createdAt: now,
+      // Bind each revision to the agreement in force when it was made, so there
+      // is never ambiguity about which terms govern which disclosure.
+      ndaExecutionId: execution.id,
+      ndaAgreementVersion: execution.agreementVersion,
+      ndaAgreementHash: execution.agreementHash,
+    }],
   });
 
   return json({
     id: submission.id,
+    revision: 1,
     createdAt: submission.createdAt,
-    contentChars: submission.contentChars,
-    contentDigest: submission.contentDigest,
+    contentChars: content.length,
+    contentDigest,
     storedAs: 'aes-256-gcm ciphertext under a key unique to this account',
     governedBy: {
       ndaExecutionId: execution.id,

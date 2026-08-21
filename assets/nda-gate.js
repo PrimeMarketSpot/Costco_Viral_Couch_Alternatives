@@ -163,7 +163,9 @@ async function execute(event) {
     }
 
     state.executed = payload;
-    renderReceipt(payload, el('email').value.trim().toLowerCase());
+    // Executing signs you in — the server set a session cookie on the response,
+    // so nothing downstream needs to carry an email around.
+    renderReceipt(payload);
   } catch (err) {
     result.innerHTML =
       `<div class="note note--bad"><p><strong>Not executed.</strong> ${err.message}</p></div>`;
@@ -172,12 +174,11 @@ async function execute(event) {
   }
 }
 
-function renderReceipt(payload, email) {
+function renderReceipt(payload) {
   el('signForm').setAttribute('hidden', '');
   el('scrollGate').setAttribute('hidden', '');
 
-  const pdfUrl = `/api/countersigned-pdf?id=${encodeURIComponent(payload.id)}` +
-    `&email=${encodeURIComponent(email)}`;
+  const pdfUrl = `/api/countersigned-pdf?id=${encodeURIComponent(payload.id)}`;
 
   const warning = payload.warning
     ? `<div class="note note--warn"><p><strong>Deployment warning.</strong> ${payload.warning}</p></div>`
@@ -201,6 +202,11 @@ function renderReceipt(payload, email) {
       <p style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem">
         <a class="btn btn--primary" href="${pdfUrl}">Download countersigned PDF</a>
         <a class="btn btn--ghost" href="/verify.html?id=${encodeURIComponent(payload.id)}">Verify this signature</a>
+        <a class="btn btn--ghost" href="/dashboard.html">Go to your vault</a>
+      </p>
+      <p class="faint" style="margin:.9rem 0 0">
+        A copy has been emailed to you. Keep it — the execution id is how you retrieve
+        and verify this agreement later, including in a dispute with us.
       </p>
     </div>
     ${warning}
@@ -225,10 +231,10 @@ function renderReceipt(payload, email) {
       <div id="ideaResult" style="margin-top:1rem"></div>
     </div>`;
 
-  el('ideaForm').addEventListener('submit', (event) => submitIdea(event, email));
+  el('ideaForm').addEventListener('submit', submitIdea);
 }
 
-async function submitIdea(event, email) {
+async function submitIdea(event) {
   event.preventDefault();
   const result = el('ideaResult');
   const btn = event.target.querySelector('button[type=submit]');
@@ -240,7 +246,6 @@ async function submitIdea(event, email) {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        email,
         title: el('ideaTitle').value,
         content: el('ideaContent').value,
       }),

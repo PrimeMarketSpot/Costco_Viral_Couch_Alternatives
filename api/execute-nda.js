@@ -17,6 +17,8 @@
 import { AGREEMENT_VERSION, textForVersion } from '../lib/nda-text.js';
 import { hashText, newId, countersign, usingEphemeralKey, safeEqualHex } from '../lib/crypto.js';
 import { appendExecution, latestExecutionForTenant } from '../lib/store.js';
+import { createSession, sessionCookieHeader } from '../lib/auth.js';
+import { send, countersignedCopyMail } from '../lib/mailer.js';
 import { json, fail, methodNotAllowed, readJson, clientIp, isEmail, isNonEmptyString } from '../lib/http.js';
 
 export default async function handler(req) {
@@ -81,6 +83,12 @@ export default async function handler(req) {
   const existing = await latestExecutionForTenant(tenantId);
   if (existing && existing.agreementVersion === agreementVersion) {
     // Idempotent: re-signing the same version is a no-op, not a duplicate record.
+    // Still issue a session — signing is also how you get back into your vault.
+    const { secret } = await createSession(tenantId, {
+      userAgent: req.headers.get('user-agent'),
+      ip: clientIp(req),
+    });
+
     return json({
       alreadyExecuted: true,
       id: existing.id,
@@ -89,7 +97,7 @@ export default async function handler(req) {
       executedAt: existing.executedAt,
       countersignature: existing.countersignature,
       verifyUrl: `/verify.html?id=${encodeURIComponent(existing.id)}`,
-    });
+    }, 200, { 'set-cookie': sessionCookieHeader(secret) });
   }
 
   /* --- Build, countersign, append ---------------------------------------- */
@@ -125,6 +133,25 @@ export default async function handler(req) {
     countersignedBy: 'company',
   });
 
+  // Signing establishes identity: the signatory proved control of nothing yet,
+  // but they are now a party to an agreement, and they need a way back into the
+  // vault they are about to fill. The magic-link flow re-verifies the address on
+  // any later sign-in.
+  const { secret } = await createSession(tenantId, {
+    userAgent: req.headers.get('user-agent'),
+    ip: clientIp(req),
+  });
+
+  const origin = new URL(req.url).origin;
+  const verifyUrl = `${origin}/verify.html?id=${encodeURIComponent(stored.id)}`;
+  const downloadUrl = `${origin}/api/countersigned-pdf?id=${encodeURIComponent(stored.id)}`;
+
+  // ESIGN requires the signer be able to retain a copy. Mail it rather than
+  // relying on them to download it in the moment.
+  await send(countersignedCopyMail({
+    to: tenantId, executionId: stored.id, verifyUrl, downloadUrl,
+  }));
+
   return json({
     id: stored.id,
     agreementVersion: stored.agreementVersion,
@@ -138,7 +165,7 @@ export default async function handler(req) {
       ? 'Server is using an ephemeral countersigning key. This signature will not ' +
         'verify after a restart. Set COUNTERSIGN_PRIVATE_KEY before production use.'
       : undefined,
-  }, 201);
+  }, 201, { 'set-cookie': sessionCookieHeader(secret) });
 }
 
 export const config = { path: '/api/execute-nda' };

@@ -32,6 +32,7 @@ const NAV = [
   { href: '/compare.html',                label: 'Compare' },
   { href: '/nda.html',                    label: 'The NDA' },
   { href: '/verify.html',                 label: 'Verify' },
+  { href: '/dashboard.html',              label: 'Your vault' },
 ];
 
 const SEAL_SVG = `

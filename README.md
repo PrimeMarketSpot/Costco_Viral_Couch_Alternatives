@@ -28,15 +28,22 @@ nicer legal page, this would be the same product with better copy. So:
 
 | Promise | Mechanism |
 |---|---|
-| NDA before disclosure | `api/submit-idea.js` returns 403 for any account with no execution record, *before reading the content field* |
+| NDA before disclosure | `requireSignedNda()` gates `api/submit-idea.js` *before it reads the content field* |
+| Identity can't be forged | Every protected endpoint derives the account from the session cookie, never from the request body |
 | You signed what we stored | One canonical text (`lib/nda-text.js`), served by `api/agreement.js`, hashed on both ends, mismatch → 409 |
 | Verifiable by third parties | Ed25519 countersignature with a **published public key** — verifiable without our cooperation |
 | The log wasn't rewritten | Append-only, hash-chained execution records (`lib/store.js`) |
 | We can't train on your idea | AES-256-GCM under a per-account key; we don't hold readable content |
 | Deletion is real | Cryptographic erasure — destroy the account key, ciphertext is unrecoverable |
+| Export is never paywalled | `api/export-all.js` consults no billing state; a test asserts the source contains no payment check |
+| Your history survives edits | Revisions accumulate and are never overwritten — the record of what you disclosed, and when |
 
 An asymmetric signing key is deliberate: an HMAC would let us prove a countersignature only to
 ourselves, which is worth nothing to a user in a dispute.
+
+Auth is passwordless on the same principle: a site that asks you to keep as little with us as
+possible has no business storing a credential it doesn't need. Sign-in links are single use, and
+sessions are stored as digests, so a read-only leak of the session store lets nobody in.
 
 ## Running it
 
@@ -69,11 +76,21 @@ is-your-idea-protected.html    The legal analysis — the core marketing asset
 compare.html                   Sourced comparison (UNVERIFIED — see SOURCES.md)
 nda.html                       Read, scroll, sign, then disclose
 verify.html                    Public verification
+signin.html                    Passwordless sign-in
+dashboard.html                 The vault: submissions, revisions, export
 legal/                         Our own terms, privacy, IP, subprocessors
-lib/                           nda-text · crypto · store · pdf · http
-api/                           agreement · execute-nda · verify-nda · submit-idea · countersigned-pdf
-test/gate.test.js              The claims, as assertions
+lib/                           nda-text · crypto · store · auth · mailer · pdf · http
+api/                           agreement · execute-nda · verify-nda · submit-idea
+                               submissions · export-all · countersigned-pdf
+                               me · auth-request-link · auth-verify · auth-logout
+test/gate.test.js              The claims, as assertions (46 tests)
 ```
+
+### Environment (optional)
+
+| Variable | Purpose |
+|---|---|
+| `MAIL_PROVIDER` / `MAIL_FROM` | Transactional email. Unset in dev logs mail to the console; unset in **production it throws**, rather than silently dropping a sign-in link someone is waiting for. |
 
 ## Before this can launch
 
@@ -87,10 +104,12 @@ test/gate.test.js              The claims, as assertions
    tokens in `assets/theme.css`. Filling the `[BRAND]` placeholder in the agreement requires a
    version bump, because it changes the document hash.
 5. **Generate and store production keys** (`npm run keygen`).
-6. **Replace the file-backed store** in `lib/store.js` with a real database. The seven exported
-   functions are the seam.
+6. **Replace the file-backed store** in `lib/store.js` with a real database. Its exported functions
+   are the seam — nothing else touches storage. This is required, not optional: serverless
+   filesystems are ephemeral, so the current store will lose data on any real deploy.
+7. **Pick a transactional email vendor**, implement `deliver()` in `lib/mailer.js`, and add it to
+   `legal/subprocessors.html`. Sign-in links and countersigned copies don't reach anyone until then.
 
-## Phase 2
+## Still to build
 
-Accounts and auth, member dashboard, idea vault with versioning, team invites, one-click
-export-everything, billing, and the build agents themselves.
+Team invites, billing, rate limiting on the sign-in endpoint, and the build agents themselves.

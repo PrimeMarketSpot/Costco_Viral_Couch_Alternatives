@@ -1,0 +1,332 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your vault</title>
+<meta name="description" content="Your submissions, their revision history, the agreement governing each, and a one-click export of everything.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  .vault { display: grid; gap: 1.5rem; align-items: start; }
+  @media (min-width: 900px) { .vault { grid-template-columns: 300px 1fr; } }
+
+  .vault-list { display: grid; gap: .5rem; }
+  .vault-item {
+    width: 100%; text-align: left; font: inherit; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: .75rem .9rem;
+  }
+  .vault-item:hover { border-color: var(--border-strong); }
+  .vault-item[aria-current="true"] {
+    border-color: var(--brand-accent);
+    background: var(--brand-accent-weak);
+  }
+  .vault-item strong { display: block; font-size: .95rem; margin-bottom: .15rem; }
+  .vault-item span { font-size: .78rem; color: var(--ink-muted); }
+
+  label { font-weight: 620; font-size: .93rem; display: block; }
+  input[type=text], textarea {
+    width: 100%; padding: .6rem .72rem; font: inherit; font-size: .95rem;
+    color: var(--ink); background: var(--surface);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  }
+  textarea { font-family: var(--font-mono); font-size: .87rem; resize: vertical; }
+
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: .3rem 1.1rem;
+    font-size: .78rem; color: var(--ink-muted); margin-top: .6rem;
+  }
+  .meta-row .mono { color: var(--ink); overflow-wrap: anywhere; }
+
+  .history { font-size: .84rem; display: grid; gap: .3rem; margin: .6rem 0 0; padding: 0; list-style: none; }
+  .history button {
+    font: inherit; font-size: .84rem; background: none; border: 0; padding: 0;
+    color: var(--brand-accent); cursor: pointer; text-decoration: underline;
+  }
+  .account-bar {
+    display: flex; flex-wrap: wrap; gap: .75rem; align-items: center;
+    justify-content: space-between; margin-bottom: 1.5rem;
+  }
+</style>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-site-header></div>
+
+<main id="main" class="page section">
+  <div id="root"><p class="faint">Loading…</p></div>
+</main>
+
+<div data-site-footer></div>
+<script type="module" src="/assets/brand.js"></script>
+<script type="module">
+  const root = document.getElementById('root');
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const when = (iso) => new Date(iso).toLocaleString();
+
+  const api = async (url, options) => {
+    const res = await fetch(url, options);
+    const data = res.headers.get('content-type')?.includes('json') ? await res.json() : null;
+    return { ok: res.ok, status: res.status, data };
+  };
+
+  let me = null;
+  let selected = null;
+
+  /* --- Gates ------------------------------------------------------------ */
+
+  function renderSignedOut() {
+    root.innerHTML = `
+      <div class="prose">
+        <h1>Your vault</h1>
+        <p class="lead">Sign in to see your submissions.</p>
+        <p><a class="btn btn--primary" href="/signin.html">Sign in</a></p>
+      </div>`;
+  }
+
+  function renderNoNda() {
+    root.innerHTML = `
+      <div class="prose">
+        <h1>Your vault</h1>
+        <div class="note note--warn">
+          <p><strong>No countersigned agreement on this account yet.</strong></p>
+          <p style="margin-bottom:0">
+            The vault stays closed until the mutual NDA is executed — that ordering is the
+            whole point, and it applies to you as much as to the marketing copy.
+          </p>
+        </div>
+        <p><a class="btn btn--primary" href="/nda.html">Read and execute the NDA</a></p>
+      </div>`;
+  }
+
+  /* --- Main view -------------------------------------------------------- */
+
+  function renderShell() {
+    root.innerHTML = `
+      <div class="account-bar">
+        <div>
+          <h1 style="margin:0">Your vault</h1>
+          <p class="faint" style="margin:.2rem 0 0">${esc(me.email)}</p>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <a class="btn btn--ghost" href="/api/export-all">Export everything</a>
+          <button class="btn btn--ghost" id="signOut" type="button">Sign out</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:1.5rem">
+        <p class="pill pill--good">Agreement in force</p>
+        <div class="meta-row" style="margin-top:.7rem">
+          <span>Version <span class="mono">${esc(me.nda.agreementVersion)}</span></span>
+          <span>Executed <span class="mono">${when(me.nda.executedAt)}</span></span>
+          <span>Signed by <span class="mono">${esc(me.nda.signatoryName)}</span></span>
+        </div>
+        <div class="meta-row">
+          <span>Document hash <span class="mono">${esc(me.nda.agreementHash)}</span></span>
+        </div>
+        <p style="display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0 0">
+          <a class="btn btn--ghost" href="${esc(me.nda.downloadUrl)}">Download countersigned PDF</a>
+          <a class="btn btn--ghost" href="${esc(me.nda.verifyUrl)}">Verify</a>
+        </p>
+      </div>
+
+      <div class="vault">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.6rem">
+            <h2 style="margin:0;font-size:1.05rem">Submissions</h2>
+            <button class="btn btn--ghost" id="newBtn" type="button"
+                    style="padding:.35rem .7rem;font-size:.85rem">New</button>
+          </div>
+          <div class="vault-list" id="list"></div>
+        </div>
+        <div id="detail"></div>
+      </div>`;
+
+    document.getElementById('signOut').addEventListener('click', signOut);
+    document.getElementById('newBtn').addEventListener('click', renderNewForm);
+  }
+
+  async function loadList() {
+    const { data } = await api('/api/submissions');
+    const list = document.getElementById('list');
+
+    if (!data.submissions.length) {
+      list.innerHTML = `<p class="faint" style="font-size:.9rem">Nothing yet.</p>`;
+      renderNewForm();
+      return;
+    }
+
+    list.innerHTML = data.submissions.map((s) => `
+      <button class="vault-item" data-id="${esc(s.id)}"
+              aria-current="${s.id === selected}">
+        <strong>${esc(s.title)}</strong>
+        <span>${s.revisionCount} revision${s.revisionCount === 1 ? '' : 's'} · ${when(s.updatedAt)}</span>
+      </button>`).join('');
+
+    for (const btn of list.querySelectorAll('.vault-item')) {
+      btn.addEventListener('click', () => openSubmission(btn.dataset.id));
+    }
+
+    if (!selected) openSubmission(data.submissions[data.submissions.length - 1].id);
+  }
+
+  async function openSubmission(id, revision) {
+    selected = id;
+    const url = revision
+      ? `/api/submissions?id=${encodeURIComponent(id)}&revision=${revision}`
+      : `/api/submissions?id=${encodeURIComponent(id)}`;
+    const { ok, data } = await api(url);
+    if (!ok) return;
+
+    const isLatest = data.revision === data.revisionCount;
+
+    document.getElementById('detail').innerHTML = `
+      <div class="card">
+        <h2 style="margin:0 0 .1rem">${esc(data.title)}</h2>
+        <div class="meta-row">
+          <span>Revision ${data.revision} of ${data.revisionCount}</span>
+          <span>${when(data.updatedAt)}</span>
+          <span>Under agreement <span class="mono">${esc(data.governedBy.agreementVersion)}</span>
+            · <a href="${esc(data.governedBy.verifyUrl)}">verify</a></span>
+        </div>
+
+        <div style="margin-top:1.1rem">
+          <label for="content">${isLatest ? 'Content' : `Revision ${data.revision} (read-only)`}</label>
+          <textarea id="content" rows="14" ${isLatest ? '' : 'readonly'}>${esc(data.content)}</textarea>
+        </div>
+
+        <div class="meta-row">
+          <span>Digest <span class="mono">${esc(data.contentDigest)}</span></span>
+        </div>
+
+        ${isLatest ? `
+          <p style="margin:1rem 0 0">
+            <button class="btn btn--primary" id="saveBtn" type="button">Save as revision ${data.revisionCount + 1}</button>
+          </p>` : `
+          <p style="margin:1rem 0 0">
+            <button class="btn btn--ghost" id="latestBtn" type="button">Back to latest</button>
+          </p>`}
+
+        <div id="saveResult" style="margin-top:.8rem"></div>
+
+        ${data.history.length > 1 ? `
+          <div style="margin-top:1.4rem;padding-top:1rem;border-top:1px solid var(--border)">
+            <strong style="font-size:.9rem">History</strong>
+            <ul class="history">
+              ${data.history.slice().reverse().map((h) => `
+                <li>
+                  <button data-rev="${h.revision}">Revision ${h.revision}</button>
+                  <span class="faint">· ${when(h.createdAt)} · ${h.contentChars.toLocaleString()} chars</span>
+                </li>`).join('')}
+            </ul>
+          </div>` : ''}
+      </div>`;
+
+    document.getElementById('saveBtn')?.addEventListener('click', () => saveRevision(id));
+    document.getElementById('latestBtn')?.addEventListener('click', () => openSubmission(id));
+    for (const b of document.querySelectorAll('.history button')) {
+      b.addEventListener('click', () => openSubmission(id, b.dataset.rev));
+    }
+
+    for (const item of document.querySelectorAll('.vault-item')) {
+      item.setAttribute('aria-current', String(item.dataset.id === id));
+    }
+  }
+
+  async function saveRevision(id) {
+    const btn = document.getElementById('saveBtn');
+    const out = document.getElementById('saveResult');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const { ok, data } = await api(`/api/submissions?id=${encodeURIComponent(id)}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ content: document.getElementById('content').value }),
+    });
+
+    if (!ok) {
+      out.innerHTML = `<div class="note note--bad"><p style="margin-bottom:0">${
+        esc(data?.error?.message ?? 'Save failed.')}</p></div>`;
+      btn.disabled = false;
+      btn.textContent = 'Save';
+      return;
+    }
+
+    await loadList();
+    await openSubmission(id);
+  }
+
+  function renderNewForm() {
+    selected = null;
+    for (const item of document.querySelectorAll('.vault-item')) {
+      item.setAttribute('aria-current', 'false');
+    }
+
+    document.getElementById('detail').innerHTML = `
+      <div class="card">
+        <h2 style="margin:0 0 .8rem">New submission</h2>
+        <form id="newForm" class="stack">
+          <div>
+            <label for="newTitle">Working title</label>
+            <p class="faint" style="margin:.2rem 0 .4rem;font-size:.85rem">
+              Stored unencrypted so the list above is readable without decrypting.
+              Put nothing confidential here.
+            </p>
+            <input id="newTitle" type="text" required maxlength="300" autocomplete="off">
+          </div>
+          <div>
+            <label for="newContent">Your idea</label>
+            <p class="faint" style="margin:.2rem 0 .4rem;font-size:.85rem">
+              Encrypted under a key unique to your account. Never used for training. Never sold.
+            </p>
+            <textarea id="newContent" rows="14" required></textarea>
+          </div>
+          <button class="btn btn--primary" type="submit">Submit under NDA</button>
+        </form>
+        <div id="newResult" style="margin-top:.8rem"></div>
+      </div>`;
+
+    document.getElementById('newForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const btn = event.target.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      const { ok, data } = await api('/api/submit-idea', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          title: document.getElementById('newTitle').value,
+          content: document.getElementById('newContent').value,
+        }),
+      });
+
+      if (!ok) {
+        document.getElementById('newResult').innerHTML =
+          `<div class="note note--bad"><p style="margin-bottom:0">${
+            esc(data?.error?.message ?? 'Submission failed.')}</p></div>`;
+        btn.disabled = false;
+        btn.textContent = 'Submit under NDA';
+        return;
+      }
+
+      selected = data.id;
+      await loadList();
+      await openSubmission(data.id);
+    });
+  }
+
+  async function signOut() {
+    await api('/api/auth-logout', { method: 'POST' });
+    location.href = '/';
+  }
+
+  /* --- Boot ------------------------------------------------------------- */
+
+  const { data } = await api('/api/me');
+  me = data;
+
+  if (!me.signedIn) renderSignedOut();
+  else if (!me.nda.executed) renderNoNda();
+  else { renderShell(); await loadList(); }
+</script>

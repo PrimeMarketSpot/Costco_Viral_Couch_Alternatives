@@ -1,0 +1,100 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in</title>
+<meta name="description" content="Sign in with a single-use link. No password, because we would rather not hold one.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/theme.css">
+<style>
+  label { font-weight: 620; font-size: .95rem; display: block; }
+  input[type=email] {
+    width: 100%; padding: .62rem .75rem; font: inherit; font-size: .97rem;
+    color: var(--ink); background: var(--surface);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  }
+</style>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<div data-site-header></div>
+
+<main id="main" class="page section">
+  <div class="prose">
+    <h1>Sign in</h1>
+    <p class="lead">We'll email you a link. It works once and expires in 15 minutes.</p>
+  </div>
+
+  <div id="alert"></div>
+
+  <form id="signinForm" class="card stack" style="max-width:46ch;margin-top:1.5rem">
+    <div>
+      <label for="email">Email</label>
+      <input id="email" type="email" required maxlength="320" autocomplete="email" autofocus>
+    </div>
+    <button class="btn btn--primary" type="submit">Email me a link</button>
+  </form>
+
+  <div class="prose" style="margin-top:3rem">
+    <h2>Why there's no password</h2>
+    <p class="muted">
+      We ask you to keep as little with us as possible, so it would be strange to insist on
+      holding a credential we don't need. Email possession is already the recovery factor
+      behind every password system — a password just adds something for us to leak, and
+      something you have probably reused somewhere that matters more than here.
+    </p>
+    <p class="muted">
+      Sign-in links are single use. Following one consumes it, so a link sitting in an old
+      inbox, a proxy log, or your browser history isn't a way in.
+    </p>
+  </div>
+</main>
+
+<div data-site-footer></div>
+<script type="module" src="/assets/brand.js"></script>
+<script type="module">
+  const alertBox = document.getElementById('alert');
+
+  const ERRORS = {
+    missing_token: 'That link had no token in it. Request a new one below.',
+    invalid_token: 'That link has expired or was already used. Request a new one below.',
+  };
+
+  const error = new URLSearchParams(location.search).get('error');
+  if (error) {
+    alertBox.innerHTML = `<div class="note note--warn" style="max-width:46ch">
+      <p style="margin-bottom:0">${ERRORS[error] ?? 'Something went wrong. Try again.'}</p>
+    </div>`;
+  }
+
+  document.getElementById('signinForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const btn = event.target.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+      const res = await fetch('/api/auth-request-link', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: document.getElementById('email').value }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alertBox.innerHTML = `<div class="note note--bad" style="max-width:46ch">
+          <p style="margin-bottom:0">${data.error?.message ?? 'Something went wrong.'}</p></div>`;
+        btn.disabled = false;
+        btn.textContent = 'Email me a link';
+        return;
+      }
+
+      event.target.setAttribute('hidden', '');
+      alertBox.innerHTML = `<div class="note" style="max-width:46ch">
+        <p style="margin-bottom:0"><strong>Check your email.</strong> ${data.message}</p></div>`;
+    } catch (err) {
+      alertBox.innerHTML = `<div class="note note--bad" style="max-width:46ch">
+        <p style="margin-bottom:0">${err.message}</p></div>`;
+      btn.disabled = false;
+      btn.textContent = 'Email me a link';
+    }
+  });
+</script>

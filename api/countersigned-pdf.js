@@ -1,19 +1,25 @@
 /* ---------------------------------------------------------------------------
-   GET /api/countersigned-pdf?id=<execution-id>&email=<signatory email>
+   GET /api/countersigned-pdf?id=<execution-id>
 
    Returns the executed agreement as a PDF carrying both signatures, the document
    hash, the countersignature, and a verification URL.
 
-   Access control: the caller must supply the signatory's email, which must match
-   the record. That is weak authentication and it is temporary — Phase 2 puts
-   this behind real sessions. It is enough to stop enumeration of execution ids
-   while keeping the artifact retrievable, which ESIGN requires (the signer must
-   be able to retain a copy).
+   Access control is the session cookie, and the session's account must match the
+   record's signatory. An earlier version accepted the signatory's email as a
+   query parameter instead — which meant anyone who learned an execution id and
+   guessed an email could pull someone else's executed agreement, and put that
+   email into server logs, browser history, and any referrer header along the way.
+   Guessing an email is not authentication.
+
+   The document remains publicly *verifiable* without signing in — /verify.html
+   confirms integrity from the id alone. Verifiable and readable are different
+   things, and only the second needs protecting.
    --------------------------------------------------------------------------- */
 
 import { textForVersion } from '../lib/nda-text.js';
 import { getExecution } from '../lib/store.js';
 import { textToPdf } from '../lib/pdf.js';
+import { requireSession } from '../lib/auth.js';
 import { fail } from '../lib/http.js';
 
 const RULE = '='.repeat(84);
@@ -72,19 +78,17 @@ export default async function handler(req) {
 
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
-  const email = url.searchParams.get('email');
-
   if (!id) return fail(400, 'id_required', 'Provide ?id=<execution-id>.');
-  if (!email) {
-    return fail(400, 'email_required',
-      'Provide the signatory email as ?email= to retrieve the countersigned copy.');
-  }
+
+  const auth = await requireSession(req);
+  if (!auth.ok) return fail(auth.status, auth.code, auth.message);
 
   const record = await getExecution(id);
   if (!record) return fail(404, 'not_found', 'No such execution record.');
 
-  if (record.signatory.email !== email.trim().toLowerCase()) {
-    // Same response as a missing record, so this cannot be used as an oracle.
+  if (record.signatory.email !== auth.tenantId) {
+    // Same response as a missing record, so this cannot be used as an oracle
+    // for which execution ids exist.
     return fail(404, 'not_found', 'No such execution record.');
   }
 

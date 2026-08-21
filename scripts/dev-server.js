@@ -23,6 +23,12 @@ const ROUTES = {
   '/api/verify-nda': () => import('../api/verify-nda.js'),
   '/api/submit-idea': () => import('../api/submit-idea.js'),
   '/api/countersigned-pdf': () => import('../api/countersigned-pdf.js'),
+  '/api/auth-request-link': () => import('../api/auth-request-link.js'),
+  '/api/auth-verify': () => import('../api/auth-verify.js'),
+  '/api/auth-logout': () => import('../api/auth-logout.js'),
+  '/api/me': () => import('../api/me.js'),
+  '/api/submissions': () => import('../api/submissions.js'),
+  '/api/export-all': () => import('../api/export-all.js'),
 };
 
 const MIME = {
