@@ -44,10 +44,27 @@ with the real section reference.
 - [ ] **Code ownership.** Find the precise ownership language. Draft asserts the user does not
       own the code but may export it. This row needs an exact quote or it gets cut — "you don't
       own it" is a strong claim to make about someone else's contract.
-- [ ] **Confidentiality.** Search the document for `confidential`. Record what obligations
-      exist and to whom they run. The draft's central claim is that **no** confidentiality
-      obligation runs to a user's submitted idea. If any such clause exists, the entire
-      positioning of the site needs revisiting — check this one first.
+- [x] **Confidentiality — VERIFIED 2026-08-28.** The premise holds, and in a stronger form than
+      "no clause". `confidential` appears twice in the Terms, and **both obligations run from the
+      user to the company**:
+
+      §F (Beta Offerings): "For any such confidential Beta Offerings, you agree to not disclose,
+      divulge, display, or otherwise make available any of the Beta Offerings without our prior
+      written consent."
+
+      §2 (Eligibility and Accounts): "You are solely responsible for maintaining the
+      confidentiality and security of your credentials."
+
+      The first protects their beta features; the second is about the user's password. Neither
+      places the company under a duty of confidence toward a submitted idea. This is a better
+      finding than absence would have been: they know how to draft a confidentiality clause, and
+      drafted one for their own benefit and not the user's.
+
+      **Still outstanding for this row before publish:**
+      - [ ] Confirm the browser's find bar reported only these hits (e.g. "3 of 3") — a missed
+            occurrence elsewhere in the document would undercut the claim.
+      - [ ] Search `/privacy` for `confidential` too, and record what is there.
+      - [ ] archive.org snapshot of `/terms`, so the quotes can be dated and shown as-of.
 - [ ] **Export after termination.** What survives cancellation? Is export gated on an active
       subscription?
 - [ ] **Feedback clause.** Check for a perpetual/irrevocable licence over "Feedback", which
