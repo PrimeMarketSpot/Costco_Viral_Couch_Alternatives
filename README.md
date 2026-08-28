@@ -63,10 +63,36 @@ also what makes the strict CSP in `netlify.toml` possible.
 |---|---|
 | `COUNTERSIGN_PRIVATE_KEY` | Ed25519 PKCS8 PEM. **Required in production.** |
 | `MASTER_KEK` | 32 bytes base64, wraps per-account content keys. **Required in production.** Losing it makes every submission permanently unreadable. |
-| `DATA_DIR` | Storage root. Defaults to `.data/`. |
+| `DATA_DIR` | Filesystem backend only. Storage root, defaults to `.data/`. |
+| `STORE_BACKEND` | `fs` or `blobs`. Auto-selected; set only to override. |
 
 Without the first two, the code runs with loud dev-only fallbacks and refuses to start in
 production.
+
+## Deploying
+
+```bash
+npm run keygen        # prints the two required secrets
+```
+
+Then in Netlify: **Add new site → Import an existing project → GitHub → this repo.**
+
+Three settings that are easy to miss:
+
+1. **Branch to deploy** — the work is on `claude/competitor-platform-nda-w4jg6b`, not the default
+   branch. Netlify will offer the default; change it.
+2. **Build command** — leave empty. Publish directory `.`, functions directory `api`. Already set
+   in `netlify.toml`.
+3. **Environment variables** — add `COUNTERSIGN_PRIVATE_KEY` and `MASTER_KEK` as **secrets**,
+   scoped to Functions, *before* the first deploy. Without them the functions throw on boot.
+
+Storage needs no setup: `NETLIFY=true` is set automatically at runtime, which selects the Blobs
+backend, and Blobs provisions itself.
+
+**Rotating keys.** `MASTER_KEK` has no recovery path — losing it makes every stored submission
+permanently unreadable, which is the design working correctly. Back it up before there is anything
+to lose. Rotating `COUNTERSIGN_PRIVATE_KEY` invalidates verification of every signature made under
+the old one; if you ever rotate, keep the old public key published alongside the new one.
 
 ## Layout
 
