@@ -28,6 +28,7 @@ import { getTenantKeyRecord, putTenantKeyRecord, putSubmission } from '../lib/st
 import { createTenantKey, unwrapTenantKey, encryptForTenant, hashText, newId }
   from '../lib/crypto.js';
 import { requireSignedNda } from '../lib/auth.js';
+import { consume, tooManyRequests } from '../lib/rate-limit.js';
 import { json, fail, methodNotAllowed, readJson, isNonEmptyString } from '../lib/http.js';
 
 const MAX_CONTENT_CHARS = 100_000;
@@ -47,6 +48,14 @@ export default async function handler(req) {
   const { tenantId, execution } = auth;
 
   /* ======================================================================= */
+
+  // Already authenticated and NDA-gated, so abuse costs a signature first.
+  // Limited anyway to bound how much a single account can store.
+  const byTenant = await consume('submit-tenant', tenantId);
+  if (!byTenant.allowed) {
+    return tooManyRequests(byTenant.retryAfterSeconds,
+      'Too many submissions in a short period. Try again shortly.');
+  }
 
   const [body, bodyError] = await readJson(req);
   if (bodyError) return bodyError;

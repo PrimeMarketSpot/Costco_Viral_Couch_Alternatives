@@ -19,10 +19,20 @@ import { hashText, newId, countersign, usingEphemeralKey, safeEqualHex } from '.
 import { appendExecution, latestExecutionForTenant } from '../lib/store.js';
 import { createSession, sessionCookieHeader } from '../lib/auth.js';
 import { send, countersignedCopyMail } from '../lib/mailer.js';
+import { consume, tooManyRequests } from '../lib/rate-limit.js';
 import { json, fail, methodNotAllowed, readJson, clientIp, isEmail, isNonEmptyString } from '../lib/http.js';
 
 export default async function handler(req) {
   if (req.method !== 'POST') return methodNotAllowed(['POST']);
+
+  // Unauthenticated, and every success appends to a log that by design can
+  // never be pruned. Unbounded writes to an unprunable structure is a
+  // slow-motion outage, so this is limited before the body is even parsed.
+  const byIp = await consume('execute-ip', clientIp(req));
+  if (!byIp.allowed) {
+    return tooManyRequests(byIp.retryAfterSeconds,
+      'Too many agreements executed from this address. Try again shortly.');
+  }
 
   const [body, bodyError] = await readJson(req);
   if (bodyError) return bodyError;

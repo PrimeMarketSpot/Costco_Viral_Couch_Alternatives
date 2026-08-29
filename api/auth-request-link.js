@@ -11,7 +11,8 @@
 
 import { issueLoginToken } from '../lib/auth.js';
 import { send, loginLinkMail } from '../lib/mailer.js';
-import { json, fail, methodNotAllowed, readJson, isEmail } from '../lib/http.js';
+import { consume, tooManyRequests } from '../lib/rate-limit.js';
+import { json, fail, methodNotAllowed, readJson, clientIp, isEmail } from '../lib/http.js';
 
 export default async function handler(req) {
   if (req.method !== 'POST') return methodNotAllowed(['POST']);
@@ -22,6 +23,20 @@ export default async function handler(req) {
   const { email, redirectTo } = body;
   if (!isEmail(email)) {
     return fail(422, 'email_required', 'Enter a valid email address.');
+  }
+
+  // Limited on two dimensions on purpose. Per-email alone would let one caller
+  // spray thousands of distinct addresses; per-IP alone would let a botnet bury
+  // a single inbox. Both must pass.
+  const byEmail = await consume('auth-email', email.trim().toLowerCase());
+  if (!byEmail.allowed) {
+    return tooManyRequests(byEmail.retryAfterSeconds,
+      'Too many sign-in links requested for this address. Check your inbox, including spam.');
+  }
+
+  const byIp = await consume('auth-ip', clientIp(req));
+  if (!byIp.allowed) {
+    return tooManyRequests(byIp.retryAfterSeconds, 'Too many requests. Try again shortly.');
   }
 
   // Only allow same-origin redirects. An open redirect here would let a
