@@ -7,9 +7,10 @@
 
      1. Edit BRAND below.
      2. Edit the --brand-* tokens at the top of assets/theme.css.
-     3. Bump the NDA to a new version in lib/nda-text.js, because the agreement
-        text contains the literal "[BRAND]" placeholder and changing it changes
-        the document hash.
+     3. Bump the NDA to a new version in lib/nda-text.js to add the d/b/a. As of
+        v1.1.0 the agreement names the legal entity (AMPTD LLC), which is what
+        makes it enforceable; the trade name is cosmetic but still changes the
+        document hash, so it needs its own version.
 
    Nothing else needs to be touched. Do not hard-code the company name into page
    markup — write [BRAND] in the copy and this file substitutes it.
@@ -19,8 +20,8 @@ export const BRAND = {
   name: '[BRAND]',
   // One line, used in the footer and as the default meta description fallback.
   tagline: 'The NDA is signed before the idea is typed.',
-  legalName: '[BRAND] — legal entity TBD',
-  jurisdiction: '[GOVERNING_JURISDICTION]',
+  legalName: 'AMPTD LLC, an Arizona limited liability company',
+  jurisdiction: 'the State of Arizona',
   email: 'hello@example.invalid',
   // Flip to true only after every claim on compare.html has been verified
   // against the live source pages. See SOURCES.md.
