@@ -19,7 +19,11 @@
 import { textForVersion, AGREEMENT_VERSION } from '../lib/nda-text.js';
 import { hashText, verifyCountersignature, countersignPublicKeyPem, safeEqualHex } from '../lib/crypto.js';
 import { getExecution, auditChain } from '../lib/store.js';
-import { json, fail, readJson, isNonEmptyString } from '../lib/http.js';
+import { consume, tooManyRequests } from '../lib/rate-limit.js';
+import { json, fail, readJson, clientIp, isNonEmptyString } from '../lib/http.js';
+
+/** Generous ceiling on a submitted copy — the real agreement is ~13k chars. */
+const MAX_AGREEMENT_CHARS = 200_000;
 
 /** Never echo a full address back to an unauthenticated caller. */
 function redactEmail(email) {
@@ -93,6 +97,11 @@ export default async function handler(req) {
   }
 
   if (req.method === 'POST') {
+    // Public and unauthenticated on purpose, but this branch hashes whatever
+    // text it is handed. Bound both the rate and the size.
+    const byIp = await consume('verify-ip', clientIp(req));
+    if (!byIp.allowed) return tooManyRequests(byIp.retryAfterSeconds);
+
     const [body, bodyError] = await readJson(req);
     if (bodyError) return bodyError;
 
@@ -100,6 +109,12 @@ export default async function handler(req) {
     if (!isNonEmptyString(id, 100)) return fail(400, 'id_required', 'An execution id is required.');
     if (typeof text !== 'string' || !text.length) {
       return fail(400, 'text_required', 'Provide the agreement text to check.');
+    }
+    // No legitimate agreement is anywhere near this long; the current one is
+    // ~13k characters. A copy that exceeds this cannot be a match anyway.
+    if (text.length > MAX_AGREEMENT_CHARS) {
+      return fail(413, 'text_too_large',
+        `Agreement text is limited to ${MAX_AGREEMENT_CHARS.toLocaleString()} characters.`);
     }
 
     const record = await getExecution(id);

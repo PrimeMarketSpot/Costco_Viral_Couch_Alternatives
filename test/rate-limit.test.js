@@ -20,6 +20,8 @@ process.env.NODE_ENV = 'test';
 const { default: requestLink } = await import('../api/auth-request-link.js');
 const { default: executeNda } = await import('../api/execute-nda.js');
 const { LIMITS, consume } = await import('../lib/rate-limit.js');
+const { MAX_BODY_BYTES } = await import('../lib/http.js');
+const { default: verifyNda } = await import('../api/verify-nda.js');
 
 const ORIGIN = 'https://example.test';
 
@@ -131,5 +133,52 @@ describe('execute-nda is protected', () => {
       body: 'not json at all',
     }));
     assert.equal(res.status, 429);
+  });
+});
+
+describe('request bodies are bounded', () => {
+
+  test('a declared oversize body is refused without being read', async () => {
+    const res = await requestLink(new Request(`${ORIGIN}/api/auth-request-link`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'content-length': String(MAX_BODY_BYTES + 1),
+      },
+      body: JSON.stringify({ email: 'x@example.test' }),
+    }));
+    assert.equal(res.status, 413);
+    assert.equal((await res.json()).error.code, 'body_too_large');
+  });
+
+  test('an actually-oversize body is refused even with no content-length', async () => {
+    // Content-Length is advisory; the real defence is measuring what arrives.
+    const huge = 'x'.repeat(MAX_BODY_BYTES + 1024);
+    const res = await requestLink(new Request(`${ORIGIN}/api/auth-request-link`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: 'x@example.test', pad: huge }),
+    }));
+    assert.equal(res.status, 413);
+  });
+});
+
+describe('the public verify endpoint is bounded', () => {
+
+  test('refuses an implausibly large agreement copy', async () => {
+    const res = await verifyNda(new Request(`${ORIGIN}/api/verify-nda`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': '192.0.2.50' },
+      body: JSON.stringify({ id: 'whatever', text: 'x'.repeat(200_001) }),
+    }));
+    // Either cap may fire first depending on encoded size; both are correct.
+    assert.equal(res.status, 413);
+  });
+
+  test('still serves legitimate verification', async () => {
+    const res = await verifyNda(new Request(`${ORIGIN}/api/verify-nda?audit=1`, {
+      headers: { 'x-forwarded-for': '192.0.2.51' },
+    }));
+    assert.equal(res.status, 200, 'public auditability must survive the hardening');
   });
 });
