@@ -1,4 +1,7 @@
 [build]
+  # Fails the build on a misconfigured deploy rather than letting it fail
+  # silently at runtime. See scripts/preflight.js for what each check prevents.
+  command = "node scripts/preflight.js"
   publish = "."
   functions = "api"
 
